@@ -1,0 +1,2 @@
+${SPARK_VERSION_HOME}/conf/spark-env.sh
+${SPARK_VERSION_HOME}/conf/spark-defaults.conf

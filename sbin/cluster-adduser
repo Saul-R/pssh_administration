@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+source $DIR/../conf/cluster-admin-env.sh
+
+if [ "$#" != "2" ];then
+	echo "Usage: $0 <user> <group>"
+	exit 1
+fi
+
+pssh -h $DIR/../conf/all-hosts "sudo adduser $1 $2"

@@ -1,0 +1,46 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+source $DIR/../conf/cluster-admin-env.sh
+
+usage="Usage: $0 [options] <user>\noptions:\n    --purge: Removes the user's local home directory and the HDFS home directory."
+
+if [ $# -lt 1 ];then
+	echo -e $usage
+	exit 1
+fi
+
+opts=""
+purge=false
+while [ $# -gt 1 ]
+do
+  arg=$1
+  case $arg in
+    --purge )
+      purge=true
+      opts="-r"
+    ;;
+    *)
+      echo -e $usage
+      exit 1
+    ;;
+  esac
+  shift
+done
+user=$1
+
+pssh -h $DIR/../conf/all-hosts "sudo userdel $opts $1"
+
+if [ "$purge" == "true" ];then
+	sudo su -l hdfs -c "hdfs dfs -rm -r /user/$user"
+fi
+
+echo "Removing user from MongoDB..."
+mongo -u $ADMIN_USER -p $ADMIN_PASS --eval 'db.dropUser("'$user'")' $MONGO_ENDPOINT/auth
+
+echo "Removing user from Cassandra..."
+cqlsh -u $ADMIN_USER -p $ADMIN_PASS -e "DROP USER $user" $CASSANDRA_ENDPOINT
+
+echo "Removing user from Neo4j..."
+ssh $NEO4J_HOST "sudo neo4j-dropuser $user && sudo service neo4j restart"
+

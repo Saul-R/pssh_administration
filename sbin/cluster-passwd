@@ -1,0 +1,22 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+
+curr_passd=""
+if [ $# -lt 1 ];then
+	echo "Usage: $0 <user>"
+	exit 1
+fi
+
+
+echo "New Password:"
+read -s password
+echo "Retype the new password:"
+read -s password2
+
+if [ "$password" != "$password2" ];then
+        echo "Passwords don't match."
+        exit 1
+fi
+
+pssh -i -h $DIR/../conf/all-hosts "echo -e '$1:$password'|sudo chpasswd"

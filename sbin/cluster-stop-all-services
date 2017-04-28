@@ -1,0 +1,43 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+source $DIR/../conf/cluster-admin-env.sh
+
+cm_response=$(curl -sL -w "%{http_code}\\n" http://$CM_HOST:$CM_PORT -o /dev/null)
+if [ $cm_response != "200" ];then	
+	echo "Cloudera Manager is down. Check the log at $CM_HOST:/var/log/cloudera-scm-server/cloudera-scm-server.log"
+	exit 1
+fi
+
+echo "Stopping CDH Services..."
+$DIR/cluster-stop-cdh-services
+
+echo "Stopping Apache Atlas..."
+ssh $ATLAS_HOST "stop-atlas"
+
+echo "Stipping Apache Falcon..."
+ssh $FALCON_HOST "stop-falcon"
+
+echo "Stopping Mongodb..."
+for host in $MONGO_HOSTS
+do
+	ssh $host "stop-mongo"
+done
+
+echo "Stopping Cassandra..."
+for host in $CASSANDRA_HOSTS
+do
+        ssh $host "sudo service cassandra stop"
+done
+
+echo "Stopping Neo4J..."
+ssh $NEO4J_HOST "sudo service neo4j stop"
+
+echo "Stopping JupyterHub..."
+stop-jupyter
+
+echo "Stopping RStudio..."
+sudo rstudio-server stop
+
+echo "Stopping Dataiku..."
+sudo stop-dataiku

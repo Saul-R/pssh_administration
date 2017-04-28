@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+source $DIR/../conf/cluster-admin-env.sh
+
+echo "Starting CDH Services. Please Wait..."
+$DIR/../bin/start-cdh-services.py
+

@@ -1,0 +1,52 @@
+#!/bin/bash
+
+DIR="$(dirname "$(readlink -f "$0")")"
+source $DIR/../conf/cluster-admin-env.sh
+
+echo "Waiting for Cloudera Manager to be ready..."
+max_wait=120
+wait_time=0
+cm_response=""
+while [ "$cm_response" != "200" ] 
+do
+	sleep 5
+	wait_time=$((wait_time+5))
+	if [ "$wait_time" == "$max_time" ];then
+		echo "Cloudera Manager is down. Check the log at $CM_HOST:/var/log/cloudera-scm-server/cloudera-scm-server.log"
+		exit 1
+	fi
+	cm_response=$(curl -sL -w "%{http_code}\\n" http://$CM_HOST:$CM_PORT -o /dev/null)
+done
+
+echo "Starting CDH Services..."
+$DIR/cluster-start-cdh-services
+
+#echo "Starting Apache Atlas..."
+#ssh $ATLAS_HOST "start-atlas"
+
+#echo "Starting Apache Falcon..."
+#ssh $FALCON_HOST "start-falcon"
+
+#echo "Starting Mongodb..."
+#for host in $MONGO_HOSTS
+#do
+#	ssh $host "start-mongo"
+#done
+
+echo "Starting Cassandra..."
+for host in $CASSANDRA_HOSTS
+do
+        ssh $host "sudo service cassandra start"
+done
+
+#echo "Starting Neo4J..."
+#ssh $NEO4J_HOST "sudo service neo4j start"
+
+echo "Starting JupyterHub..."
+/usr/sbin/start-jupyter
+
+#echo "Starting RStudio..."
+#sudo rstudio-server start
+
+#echo "Starting Dataiku..."
+#sudo start-dataiku

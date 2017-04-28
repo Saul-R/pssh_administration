@@ -1,0 +1,47 @@
+#!/bin/bash
+DIR="$(dirname "$(readlink -f "$0")")"
+source $DIR/../conf/cluster-admin-env.sh
+
+usage="Usage: $0 [options] <number of users>\n
+Options:\n
+\t--user-prefix <prefix>: The prefix of the name for the users created. (default = user)\n
+\t--purge: Removes the user's local home directory and the HDFS home directory."
+
+user_prefix="user"
+purge=""
+while [ $# -gt 1 ]
+do
+  arg=$1
+  case $arg in
+    --user-prefix )
+	user_prefix=$2
+	shift
+    ;;
+    --password-prefix )
+        pass_prefix=$2
+        shift
+    ;;
+    --purge )
+	purge="--purge"
+    ;;
+
+    *)
+      echo -e $usage
+      exit 1
+    ;;
+  esac
+  shift
+done
+
+if [ $# -lt 1 ];then
+	echo -e $usage
+	exit 1
+fi
+num_users=$1
+
+for (( i=1; i<=num_users; i++ ))
+do
+	echo "Removing user $i..."
+	$DIR/cluster-userdel $purge $user_prefix$i &>/dev/null
+	echo "User $user_prefix$i removed."
+done

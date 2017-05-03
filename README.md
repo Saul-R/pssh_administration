@@ -9,11 +9,11 @@ Es importante que la creación de usuarios, salvo causa de fuerza mayor, se real
 http://frontend:8080/job/Administracion/job/Gestion%20de%20Usuarios/job/Creacion%20de%20usuarios%20con%20contrase%C3%B1a%20aleatoria%20opcional/
 
 Una vez en este job:
-![https://i.imgur.com/RX9j3OJ.png](Job jenkins)
+![http://i.imgur.com/RX9j3OJ.png](Job jenkins)
 
 Basta con pulsar "Build with parameters" que nos solicitará los detalles para la creación de los usuarios.
 
-![https://i.imgur.com/279Ev6l.png](crear usuario)
+![http://i.imgur.com/279Ev6l.png](crear usuario)
 
 Pulsar el boton de ejecución y ya tendríamos un usuario creado.
 
